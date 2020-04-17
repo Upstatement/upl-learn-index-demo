@@ -1,0 +1,61 @@
+/* Variables go here */
+
+/**
+ * Breakpoints
+ */
+$bp-sm: 400px;
+$bp-two-col: 750px;
+$bp-xl: 1400px;
+
+/**
+ * Space
+ */
+$space-xs: 10px;
+$space-sm: 20px;
+$space-base: 40px;
+
+/**
+ * Type
+ */
+$body: 14px;
+$heading-1: 36px;
+$heading-2: 24px;
+$heading-3: 21px;
+$heading-4: 18px;
+$heading-5: 16px;
+$heading-6: 12px;
+
+// Above restated in a map for variable interpolation in the heading mixin.
+$heading-sizes: (
+  heading-1: $heading-1,
+  heading-2: $heading-2,
+  heading-3: $heading-3,
+  heading-4: $heading-4,
+  heading-5: $heading-5,
+  heading-6: $heading-6
+);
+
+/**
+ * Colors
+ */
+$cyan: #b5fbea;
+$highlighter: #f6ff90;
+$light-gray: #cccccc;
+$mid-gray: #959595;
+$rich-black: #252c2a;
+$black: #000000;
+$white: #ffffff;
+
+/**
+ * Transition / Animation
+ */
+
+// Custom easing functions.
+// All eases are in-out, unless otherwise specified.
+$sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+$quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+$cube: cubic-bezier(0.645, 0.045, 0.355, 1);
+$circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+$back-out: cubic-bezier(0.35, 1.1, 0.65, 1.65);
+$transition-duration: 0.2s;
+$transition-default: $transition-duration $circ;

@@ -1,0 +1,279 @@
+/* Mixins go here */
+
+/**
+ * Shorthander
+ */
+@mixin shorthander($position, $value) {
+  $position-prefix: '';
+
+  @if $position == 'margin' or $position == 'padding' {
+    $position-prefix: $position + '-';
+  } @else if $position == 'null' {
+    // do nothing
+  } @else {
+    position: $position;
+  }
+
+  @if length($value) ==
+    1 and
+    $value !=
+    'n' and
+    $value !=
+    'x' and
+    $value !=
+    'null'
+  {
+    #{$position-prefix}top: auto($value);
+    #{$position-prefix}right: auto($value);
+    #{$position-prefix}bottom: auto($value);
+    #{$position-prefix}left: auto($value);
+  }
+
+  @if length($value) == 2 {
+    $value-y: nth($value, 1);
+    $value-x: nth($value, 2);
+    @if $value-y != 'n' and $value-y != 'x' and $value-y != 'null' {
+      #{$position-prefix}top: auto($value-y);
+      #{$position-prefix}bottom: auto($value-y);
+    }
+    @if $value-x != 'n' and $value-x != 'x' and $value-x != 'null' {
+      #{$position-prefix}left: auto($value-x);
+      #{$position-prefix}right: auto($value-x);
+    }
+  }
+
+  @if length($value) == 3 {
+    $value-y-top: nth($value, 1);
+    $value-x: nth($value, 2);
+    $value-y-bottom: nth($value, 3);
+
+    @if $value-y-top != 'n' and $value-y-top != 'x' and $value-y-top != 'null' {
+      #{$position-prefix}top: auto($value-y-top);
+    }
+    @if $value-x != 'n' and $value-x != 'x' and $value-x != 'null' {
+      #{$position-prefix}right: auto($value-x);
+      #{$position-prefix}left: auto($value-x);
+    }
+    @if $value-y-bottom !=
+      'n' and
+      $value-y-bottom !=
+      'x' and
+      $value-y-bottom !=
+      'null'
+    {
+      #{$position-prefix}bottom: auto($value-y-bottom);
+    }
+  }
+
+  @if length($value) == 4 {
+    $value-top: nth($value, 1);
+    $value-right: nth($value, 2);
+    $value-bottom: nth($value, 3);
+    $value-left: nth($value, 4);
+
+    @if $value-top != 'n' and $value-top != 'x' and $value-top != 'null' {
+      #{$position-prefix}top: auto($value-top);
+    }
+    @if $value-right != 'n' and $value-right != 'x' and $value-right != 'null' {
+      #{$position-prefix}right: auto($value-right);
+    }
+    @if $value-bottom !=
+      'n' and
+      $value-bottom !=
+      'x' and
+      $value-bottom !=
+      'null'
+    {
+      #{$position-prefix}bottom: auto($value-bottom);
+    }
+    @if $value-left != 'n' and $value-left != 'x' and $value-left != 'null' {
+      #{$position-prefix}left: auto($value-left);
+    }
+  }
+}
+
+/**
+ * Fluid
+ */
+@mixin fluid($property, $vw-val-map: ()) {
+  $length: length($vw-val-map);
+  $keys: map-keys($vw-val-map);
+  $vals: map-values($vw-val-map);
+
+  @each $min-vw, $min-val in $vw-val-map {
+    $index: index($keys, $min-vw);
+
+    @if $index == 1 {
+      #{$property}: $min-val;
+    }
+
+    @if ($index == 1 and $length == 2) or $index <= $length - 1 {
+      $next-index: $index + 1;
+      $max-vw: nth($keys, $next-index);
+      $max-val: nth($vals, $next-index);
+
+      @media screen and (min-width: $min-vw) and (max-width: $max-vw) {
+        $font-diff: strip-unit($max-val - $min-val);
+        $vw-diff: strip-unit($max-vw - $min-vw);
+        $value: calc(
+          #{$min-val} + #{$font-diff} * ((100vw - #{$min-vw}) / #{$vw-diff})
+        );
+        #{$property}: $value;
+      }
+    } @else if $index > 1 {
+      @media screen and (min-width: $min-vw) {
+        #{$property}: $min-val;
+      }
+    }
+  }
+}
+
+@mixin fluid-type($vw-val-map) {
+  @include fluid(font-size, $vw-val-map);
+}
+
+/**
+ * MQ
+ */
+@mixin mq($bp-1, $bp-2: null) {
+  @if $bp-1 == 'max' {
+    @media (max-width: $bp-2 - 1) {
+      @content;
+    }
+  } @else if $bp-2 == 'max' {
+    @media (max-width: $bp-1 - 1) {
+      @content;
+    }
+  } @else if $bp-2 == null {
+    @media (min-width: $bp-1) {
+      @content;
+    }
+  } @else {
+    @media (min-width: $bp-1) and (max-width: $bp-2 - 1) {
+      @content;
+    }
+  }
+}
+
+/**
+ * On Focus
+ */
+@mixin on-focus($selector: null) {
+  $events: ('active', 'focus', 'focus-within', 'hover');
+
+  @each $event in $events {
+    @if $selector {
+      #{$selector}:#{$event} & {
+        @content;
+      }
+    } @else {
+      &:#{$event} {
+        @content;
+      }
+    }
+  }
+}
+
+/**
+ * Transition
+ */
+@mixin transition(
+  $duration: $transition-duration,
+  $property: all,
+  $func: $circ,
+  $delay: null
+) {
+  $transitions: null;
+  @if type-of($property) != list {
+    $property: ($property);
+  }
+  @each $specifiedProperty in $property {
+    $transitions: append(
+      $transitions,
+      $specifiedProperty $duration $delay $func,
+      comma
+    );
+  }
+  transition: $transitions;
+}
+
+/**
+ * Set Text
+ */
+@mixin set-text(
+  $size,
+  $weight,
+  $color,
+  $line-height,
+  $letter-spacing: initial
+) {
+  color: $color;
+  font-size: $size;
+  font-weight: $weight;
+  letter-spacing: $letter-spacing;
+  line-height: $line-height;
+}
+
+/**
+ * Heading
+ */
+@mixin heading(
+  $level: 1,
+  $weight: 400,
+  $color: $rich-black,
+  $size: map-get($heading-sizes, heading-#{$level}),
+  $fluid: true
+) {
+  @include set-text($size, $weight, $color, 1.25, -0.02em);
+
+  @if ($fluid == true) {
+    @include fluid-type(
+      (
+        $bp-sm: $size * 2 / 3,
+        $bp-xl: $size
+      )
+    );
+  }
+}
+
+/**
+ * Size
+ */
+@mixin size($width, $height: $width) {
+  width: $width;
+  height: $height;
+}
+
+/**
+ * Circle
+ */
+@mixin circle($size) {
+  @include size($size);
+  border-radius: ($size/2);
+}
+
+/**
+ * Spacings
+ */
+@mixin padding($value) {
+  @include shorthander(padding, $value);
+}
+
+@mixin margin($value) {
+  @include shorthander(margin, $value);
+}
+
+/**
+ * Positions
+ */
+@mixin absolute($value) {
+  @include shorthander(absolute, $value);
+}
+
+@mixin fixed($value) {
+  @include shorthander(fixed, $value);
+}
+
+@mixin relative($value) {
+  @include shorthander(relative, $value);
+}
